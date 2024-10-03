@@ -46,43 +46,39 @@ async function requestGPSPermission(): Promise<GeolocationPosition> {
   });
 }
 
-async function __getUserMedia(constraints) {
-  if (!navigator.geolocation) {
-    return Promise.reject(
-      new Error(
-        'Không thể truy cập vị trí. Please try again with another browser or check your browser\'s settings.',
-      ),
-    )
-  }
-
-  console.debug('Requesting GPS permission...');
-  await navigator.geolocation.getCurrentPosition((position) => {
-    console.debug('GPS permission granted.');
-    console.debug('Latitude:', position.coords.latitude);
-    console.debug('Longitude:', position.coords.longitude);
-  }, (error) => {
-    console.error('GPS permission denied:', error);
-  })
-
+async function requestMediaPermissions(constraints: MediaStreamConstraints): Promise<MediaStream> {
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     console.debug("Requesting camera and microphone permission...");
-    return navigator.mediaDevices.getUserMedia(constraints)
+    return navigator.mediaDevices.getUserMedia(constraints);
   }
 
   // @ts-expect-error vendor specific
-  const _getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
+  const _getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
   return new Promise((resolve, reject) => {
     if (!_getUserMedia) {
-      reject(
-        new Error(
-          'Video and audio cannot be accessed. Please try again with another browser or check your browser\'s settings.',
-        ),
-      )
+      reject(new Error('Video and audio cannot be accessed. Please try again with another browser or check your browser\'s settings.'));
+    } else {
+      _getUserMedia.call(navigator, constraints, resolve, reject);
     }
-    else {
-      _getUserMedia.call(navigator, constraints, resolve, reject)
-    }
-  })
+  });
+}
+
+async function __getUserMedia(constraints) {
+  try {
+    const [position, stream] = await Promise.all([
+      requestGPSPermission(),
+      requestMediaPermissions(constraints)
+    ]);
+
+    console.debug('GPS permission granted.');
+    console.debug('Latitude:', position.coords.latitude);
+    console.debug('Longitude:', position.coords.longitude);
+
+    return stream;
+  } catch (error) {
+    console.error('Error obtaining permissions:', error);
+    throw error;
+  }
 }
 
 export async function getUserMedia(

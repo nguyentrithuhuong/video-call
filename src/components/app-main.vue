@@ -215,7 +215,7 @@ export default {
         <div v-else-if="state.error" class="message-container -error">
           <div class="message">
             {{ state.error }}
-            <u @click="doReload">Reload page</u>
+            <u @click="doReload">Tải lại trang</u>
           </div>
         </div>
 

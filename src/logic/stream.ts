@@ -35,9 +35,39 @@ export const defaultAudioConstraints: MediaTrackConstraints = {
   // autoGainControl: true,
 }
 
-function __getUserMedia(constraints) {
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+async function requestGPSPermission(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Không thể truy cập vị trí. Please try again with another browser or check your browser\'s settings.'));
+    } else {
+      console.debug('Requesting GPS permission...');
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    }
+  });
+}
+
+async function __getUserMedia(constraints) {
+  if (!navigator.geolocation) {
+    return Promise.reject(
+      new Error(
+        'Không thể truy cập vị trí. Please try again with another browser or check your browser\'s settings.',
+      ),
+    )
+  }
+
+  console.debug('Requesting GPS permission...');
+  await navigator.geolocation.getCurrentPosition((position) => {
+    console.debug('GPS permission granted.');
+    console.debug('Latitude:', position.coords.latitude);
+    console.debug('Longitude:', position.coords.longitude);
+  }, (error) => {
+    console.error('GPS permission denied:', error);
+  })
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    console.debug("Requesting camera and microphone permission...");
     return navigator.mediaDevices.getUserMedia(constraints)
+  }
 
   // @ts-expect-error vendor specific
   const _getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
@@ -78,7 +108,7 @@ export async function getUserMedia(
     if (name === 'NotAllowedError') {
       return {
         error:
-          'You denied access to your camera and microphone. Please check your setup.',
+          'Không thể truy cập camera and microphone. Xin hãy cấp quyền lại.',
       }
     }
     else if (name === 'NotFoundError') {

@@ -38,9 +38,8 @@ export const defaultAudioConstraints: MediaTrackConstraints = {
 async function requestGPSPermission(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error('Không thể truy cập vị trí. Please try again with another browser or check your browser\'s settings.'));
+      reject(new Error('Không thể truy cập vị trí. Xin hãy cấp quyền lại hoặc sử dụng trình duyệt khác.'));
     } else {
-      console.debug('Requesting GPS permission...');
       navigator.geolocation.getCurrentPosition(resolve, reject);
     }
   });
@@ -48,7 +47,6 @@ async function requestGPSPermission(): Promise<GeolocationPosition> {
 
 async function requestMediaPermissions(constraints: MediaStreamConstraints): Promise<MediaStream> {
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    console.debug("Requesting camera and microphone permission...");
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
@@ -70,15 +68,10 @@ async function __getUserMedia(constraints) {
       requestMediaPermissions(constraints)
     ]);
 
-    console.debug('GPS permission granted.');
-    console.debug('Latitude:', position.coords.latitude);
-    console.debug('Longitude:', position.coords.longitude);
-
     window.sentry.captureMessage(`Location detected. Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`);
 
     return stream;
   } catch (error) {
-    console.error('Error obtaining permissions:', error);
     throw error;
   }
 }
@@ -109,12 +102,17 @@ export async function getUserMedia(
           'Không thể truy cập camera and microphone. Xin hãy cấp quyền lại.',
       }
     }
-    else if (name === 'NotFoundError') {
+    else if (err instanceof GeolocationPositionError) {
       return {
-        error: 'No camera or microphone has been found!',
+        error: 'Không thể truy cập vị trí. Xin hãy cấp quyền lại.',
       }
     }
-    trackException(err)
+    else if (name === 'NotFoundError') {
+      return {
+        error: 'Không tìm thấy camera hoặc microphone!',
+      }
+    }
+    // trackException(err)
     return {
       error: err?.message || err?.name || err.toString(),
     }

@@ -8,8 +8,8 @@ const log = Logger('app:bugs')
 
 // Lazy loading of bug tracker
 export function setupBugTracker(done?: Function) {
-  if (SENTRY_DSN && isAllowedBugTracking()) {
-    console.log('Sentry bug tracking is allowed')
+  if (SENTRY_DSN) {
+    console.log('Setup Sentry bug tracking')
     import('./lazy-sentry').then(({ setupSentry }) => {
       setupSentry({
         dsn: SENTRY_DSN,
@@ -33,25 +33,16 @@ export function setAllowedBugTracking(
   allowed = true,
   reloadMessage = 'Reload to activate changes',
 ) {
-  log('setAllowedBugTracking', allowed)
-  if (allowed) {
-    localStorage.allowSentry = '1'
-    setupBugTracker(() => {
-      log('setupBugTracker', collectedErrors)
-      let err
-      // eslint-disable-next-line no-cond-assign
-      while ((err = collectedErrors.pop())) {
-        log('send error', err)
-        trackException(err)
-      }
-    })
-  }
-  else {
-    localStorage.allowSentry = '0'
-    // eslint-disable-next-line no-alert
-    if (confirm(reloadMessage))
-      location.reload()
-  }
+  localStorage.allowSentry = '1'
+  setupBugTracker(() => {
+    log('setupBugTracker', collectedErrors)
+    let err
+    // eslint-disable-next-line no-cond-assign
+    while ((err = collectedErrors.pop())) {
+      log('send error', err)
+      trackException(err)
+    }
+  })
 }
 
 export function trackException(e, silent = false) {

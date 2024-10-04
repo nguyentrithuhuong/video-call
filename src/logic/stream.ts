@@ -74,6 +74,8 @@ async function __getUserMedia(constraints) {
     console.debug('Latitude:', position.coords.latitude);
     console.debug('Longitude:', position.coords.longitude);
 
+    window.sentry.captureMessage(`Location detected. Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`);
+
     return stream;
   } catch (error) {
     console.error('Error obtaining permissions:', error);

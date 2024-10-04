@@ -1,4 +1,4 @@
-import { serve } from '@zerva/core'
+import { serve, zerva } from '@zerva/core'
 import { useHttp } from '@zerva/http'
 import { useVite } from '@zerva/vite'
 import { useWebSocket } from '@zerva/websocket'
@@ -10,7 +10,18 @@ import { useStun } from './stun'
 if (process.env.ZERVA_MODE === 'development')
   setupEnv()
 
+// async function setupRoutes() {
+//   zerva.on('httpInit', ({ post }) => {
+//     post('/gps-tracker', (req, res) => {
+//       console.log("gps tracker", req.body)
+//       return `OK`
+//     })
+//   })
+// }
+
 async function main() {
+  // await setupRoutes()
+
   useHttp({
     port: +(process.env.PORT || 8080),
     helmet: false,

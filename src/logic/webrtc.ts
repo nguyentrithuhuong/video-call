@@ -32,7 +32,11 @@ export class WebRTC extends Emitter {
     return new Promise((resolve, reject) => {
       const id = uuid()
 
-      const channel = new WebSocketConnection(SIGNAL_SERVER_URL)
+      const channel = new WebSocketConnection(SIGNAL_SERVER_URL, {
+        reconnectTimeoutBase: 5000,
+        maxReconnectTimeout: 15_000,
+        messageReconnectTimeout: 60_000,
+      })
 
       channel.on('connect', () => {
         channel.postMessage(
@@ -79,7 +83,11 @@ export class WebRTC extends Emitter {
 
     log('webrtc contacts signal server')
 
-    this.websocketChannel = new WebSocketConnection(SIGNAL_SERVER_URL)
+    this.websocketChannel = new WebSocketConnection(SIGNAL_SERVER_URL, {
+      reconnectTimeoutBase: 5_000,
+      maxReconnectTimeout: 15_000,
+      messageReconnectTimeout: 60_000,
+    })
 
     const methods = {
       remove: (id: string) => {

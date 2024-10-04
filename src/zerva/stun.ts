@@ -7,7 +7,7 @@ const log = Logger('stun')
 const config = {
   udp4: true,
   udp6: true,
-  port: 3478,
+  port: 3476,
   log: null, // log.debug.bind(log),
   err: log.error.bind(log),
   sw: true,

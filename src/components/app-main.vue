@@ -15,9 +15,9 @@ export default {
   name: 'AppMain',
   components: {
     AppSettings,
-    AppShare,
-    AppChat,
-    SeaModal,
+    // AppShare,
+    // AppChat,
+    // SeaModal,
     AppVideo,
   },
   data() {

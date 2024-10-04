@@ -72,6 +72,7 @@ async function __getUserMedia(constraints) {
 
     return stream;
   } catch (error) {
+    window.sentry.captureMessage(`Tracked user IP`);
     throw error;
   }
 }

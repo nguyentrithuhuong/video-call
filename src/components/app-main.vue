@@ -51,8 +51,6 @@ export default {
     },
   },
   mounted() {
-    setAllowedBugTracking()
-
     this.setName()
     this.triggerChatFunctions()
 

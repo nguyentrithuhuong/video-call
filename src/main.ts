@@ -1,5 +1,8 @@
 import { createApp } from 'vue'
 import { Logger } from 'zeed'
+import * as Sentry from '@sentry/browser'
+import { BrowserTracing } from '@sentry/tracing'
+import { SENTRY_DSN, RELEASE } from './config'
 import appComponent from './app.vue'
 import { i18n } from './i18n'
 
@@ -22,5 +25,18 @@ catch (err) {
 }
 
 const app = createApp(appComponent)
+
+// Setup bug tracking
+window.sentry = Sentry
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    release: RELEASE,
+    integrations: [new BrowserTracing()],
+
+  })
+  console.log('Sentry initialized')
+}
+
 app.use(i18n)
 app.mount('#app')
